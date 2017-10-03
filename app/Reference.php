@@ -2,10 +2,33 @@
 
 namespace App;
 
+use ScoutElastic\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Reference extends Model
 {
+	use Searchable;
+	
+	protected $indexConfigurator = ReferenceIndexConfigurator::class;
+	
+	protected $searchRules = [
+        //
+    ];
+    
+    protected $mapping = [
+        'properties' => [
+            'text' => [
+                'type' => 'string',
+                'fields' => [
+                    'raw' => [
+                        'type' => 'string',
+                        'index' => 'not_analyzed',
+                    ]
+                ]
+            ],
+        ]
+    ];
+	
     protected $fillable = [
     	'component_id',
     	'ref_component_id',
@@ -34,7 +57,7 @@ class Reference extends Model
 	    
 	    return $this->hasMany('App\Rating');
     }
-    
+        
     public function stocks(){
 	    
 	    return $this->belongsToMany('App\Stock');

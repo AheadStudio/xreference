@@ -1,5 +1,8 @@
 #app {
-  height: 100vh;
+  height: 80vh;
+}
+.tempHidden {
+  display: none;
 }
 
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";

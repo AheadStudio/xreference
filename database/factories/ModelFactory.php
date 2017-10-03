@@ -22,3 +22,11 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+$factory->define(App\Component::class, function (Faker\Generator $faker) {
+	
+	return [
+		'part_name' => $faker->stateAbbr.$faker->stateAbbr."-".$faker->numberBetween($min = 10, $max = 9999).$faker->stateAbbr,
+		'producer_id' => $faker->optional($weight = 0.9)->numberBetween($min = 43, $max = 53),
+	];
+});

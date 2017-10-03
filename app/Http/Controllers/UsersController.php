@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\UsersEditRequest;
+use \Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class UsersController extends Controller
 {
@@ -15,13 +17,13 @@ class UsersController extends Controller
      */
     public function index()
     {
-	    //$user = User::findOrFail($id); , compact('user')
-		//$user = Auth::user();
+		$user = Auth::user();
+		//$user = User::findOrFail(Auth::id()); 
 		//$id = Auth::id();
         //$roles = Role::lists('name','id')->all();
 
 
-        return view('account.edit');
+        return view('account.edit', compact('user'));
     }
 
     /**
@@ -74,9 +76,29 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UsersEditRequest $request, $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+
+        if(trim($request->password) == ''){
+
+            $input = $request->except('password');
+
+        } else{
+
+
+            $input = $request->all();
+
+            $input['password'] = bcrypt($request->password);
+
+        }
+
+		$user->update($input);
+		
+		Session::flash('updated_user','The user has been updated');
+
+        return redirect('/account');
     }
 
     /**

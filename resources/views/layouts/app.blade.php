@@ -53,6 +53,12 @@
 
                                 <ul class="dropdown-menu" role="menu">
                                     <li>
+                                    	@if (Voyager::canOrFail('browse_admin'))
+	                                    	<a href="/admin">
+	                                            Admin Panel
+	                                        </a>
+                                    	
+                                    	@endif
                                     	<a href="/account">
                                             My account
                                         </a>
@@ -61,7 +67,7 @@
                                                      document.getElementById('logout-form').submit();">
                                             Logout
                                         </a>
-
+										
                                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                             {{ csrf_field() }}
                                         </form>
@@ -89,8 +95,13 @@
 		    
 		</div>
     </div>
-	
+	<link rel="stylesheet" href="{{ asset('js/libs/bar-rating/themes/fontawesome-stars.css') }}">
     <!-- Scripts -->
+    
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/libs/jquery.autocomplete.min.js') }}"></script>
+    <script src="{{ asset('js/libs/bar-rating/jquery.barrating.min.js') }}"></script>
+    <script src="{{ asset('js/xreference.js') }}"></script>
+    
 </body>
 </html>

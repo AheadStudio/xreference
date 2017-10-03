@@ -2,5 +2,6 @@
     "/js/app.js": "/js/app.js",
     "/css/stylus.css": "/css/stylus.css",
     "/css/sass.css": "/css/sass.css",
+    "/js/xreference.js": "/js/xreference.js",
     "/css/app.css": "/css/app.css"
 }

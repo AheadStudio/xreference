@@ -9,8 +9,10 @@
     "type": "project",
     "require": {
         "php": ">=5.6.4",
+        "babenkoivan/scout-elasticsearch-driver": "^2.1",
         "buzz/laravel-google-captcha": "^2.1",
         "laravel/framework": "5.4.*",
+        "laravel/scout": "^3.0",
         "laravel/tinker": "~1.0",
         "laravelcollective/html": "^5.4.0",
         "tcg/voyager": "^1.0"

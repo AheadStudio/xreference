@@ -167,6 +167,10 @@ return [
          * Package Service Providers...
          */
         Laravel\Tinker\TinkerServiceProvider::class,
+        // the Scout package itself
+		Laravel\Scout\ScoutServiceProvider::class,
+		// the driver for Elasticsearch
+		ScoutElastic\ScoutElasticServiceProvider::class,
 		TCG\Voyager\VoyagerServiceProvider::class,
 		Collective\Html\HtmlServiceProvider::class,
 		'Buzz\LaravelGoogleCaptcha\CaptchaServiceProvider',

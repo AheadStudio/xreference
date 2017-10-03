@@ -62,6 +62,19 @@
                         </div>
 						
 						<div class="form-group">
+							{!! Form::label('is_company', 'Company:', ['class' => 'col-md-4 control-label deactivated']) !!}
+							<div class="col-md-6">
+			                	{!! Form::checkbox('is_company', null, false, ['class' => 'deactivated']); !!}
+							</div>
+			            </div>
+						
+						<div id="hiddenField" class="form-group tempHidden">
+							<div class="col-md-6 col-md-offset-4 ">
+			                	{!! Form::text('company_name', null, ['class'=>'form-control'])!!}
+							</div>
+			            </div>
+						
+						<div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
 								{!! app('captcha')->display($attributes = []) !!}
                             </div>
