@@ -28,8 +28,9 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                   <a class="navbar-brand navbar-brand--image" href="{{ url('/') }}">
+                        <img alt="Brand" src="/images/logo.png">
+                        
                     </a>
                 </div>
 
@@ -43,8 +44,8 @@
                     <ul class="nav navbar-nav navbar-right">
                         <!-- Authentication Links -->
                         @if (Auth::guest())
-                            <li><a href="{{ route('login') }}">Login</a></li>
-                            <li><a href="{{ route('register') }}">Register</a></li>
+                            <li><a href="{{ route('login') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</a></li>
+                            <li><a href="{{ route('register') }}"><i class="fa fa-user" aria-hidden="true"></i> Register</a></li>
                         @else
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -53,9 +54,9 @@
 
                                 <ul class="dropdown-menu" role="menu">
                                     <li>
-                                    	@if (Voyager::canOrFail('browse_admin'))
+                                    	@if (Auth::user()->hasPermission('browse_admin'))
 	                                    	<a href="/admin">
-	                                            Admin Panel
+	                                            Admin Panel 
 	                                        </a>
                                     	
                                     	@endif
@@ -79,20 +80,21 @@
                 </div>
             </div>
         </nav>
-
+        
         @yield('content')
     </div>
 	
 	<div class="container">
 	    <div class="row">
-	    	<a href="https://facebook.com" target="_blank" class="pull-right h1"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+	    	
 	    </div>
 	    
 	    <hr>
 	    
 	    <div class="row">
+	    
 		    <div class="col-md-6"><p>© Xreference 2017</p></div>
-		    
+		    <a href="https://facebook.com" target="_blank" class="footer-social pull-right"><i class="fa fa-facebook" aria-hidden="true"></i></a>
 		</div>
     </div>
 	<link rel="stylesheet" href="{{ asset('js/libs/bar-rating/themes/fontawesome-stars.css') }}">

@@ -1,6 +1,30 @@
 #app {
   height: 80vh;
 }
+.navbar-brand--image {
+  padding-top: 6px !important;
+}
+.footer-social {
+  font-size: 42px;
+  color: #3b5998;
+}
+.hero-text {
+  font-size: 16px;
+}
 .tempHidden {
   display: none;
+}
+.autocomplete-suggestion .search-item {
+  border-radius: 0 !important;
+  padding: 3px 10px;
+}
+.autocomplete-suggestion .search-item .search-item-name {
+  font-size: 12px;
+}
+.autocomplete-suggestion:last-child .search-item {
+  border-bottom-right-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
+.autocomplete-suggestion:nth-child(2n) .search-item {
+  border-top: 0;
 }

@@ -22,14 +22,14 @@ class Component extends Model
                 'fields' => [
                     'raw' => [
                         'type' => 'string',
-                        'index' => 'not_analyzed',
+                        'index' => 'not_analyzed'
                     ]
                 ]
             ],
         ]
     ];    
     
-    protected $fillable = ['part_name', 'producer'];
+    protected $fillable = ['part_name', 'producer_id', 'package', 'status'];
     
     public function references(){
 	    

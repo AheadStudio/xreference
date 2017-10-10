@@ -11,6 +11,16 @@ use Illuminate\Support\Facades\Session;
 class UsersController extends Controller
 {
     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -111,4 +121,15 @@ class UsersController extends Controller
     {
         //
     }
+    
+    /**
+     * Page for upload exel file to import components.
+     *
+     */
+    public function upload()
+    {
+	    return view('account.upload');
+    }
+    
+    
 }

@@ -64,41 +64,61 @@
 			
 			init: function() {
 				
+				$.ajaxSetup({
+				    headers: {
+				        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				    }
+				});
+				
 				$("#component_name", $sel.body).autocomplete({
 		            
 		            minChars: 3,
-		            groupBy: "category",
-		            lookup: [
-						{
-							value: "MDIA-4942MN",
-							data: {
-								id: "692",
-								producer: "Getranke Dunkok"
-							}
-						}, 
-						{
-							value: "MDIA-7078VA",
-							data: {
-								id: "675",
-								producer: "Tokoshima Ind."								
-							}
-						}
-		            ],
-
+		            showNoSuggestionNotice: true,
+		            noSuggestionNotice: "No results in DataBase",
+		            serviceUrl: '/api/component/search',
+					type: 'POST',
+					preventBadQueries: false,
+					
 		            formatResult: function(suggestion, currentValue) {
 						
-						var strItem = '<div class="list-group">';
+						var strItem = ' ';
 						
 						itemName = suggestion.value.toUpperCase().replace(currentValue.toUpperCase(), "<b>" + currentValue.toUpperCase() + "</b>");
 						
-						strItem += '<a href="#" class="search-item" data-id="'+suggestion.data.id+'">' + '<div class="search-item-name">' + itemName + " [" + suggestion.data.producer + "]" + '</div>' + '</a>';
+						strItem += '<a href="#" class="search-item list-group-item" data-id="'+suggestion.data.id+'">' + '<div class="search-item-name">' + itemName + " [" + suggestion.data.producer + "]" + '</div>' + '</a>';
 						
-						var strItem = '</div>';
 						return strItem;
 		            },
 		            onSelect: function(suggestion) {
-						console.log(suggestion);
+						
 						$("#hidden_comp_id").val(suggestion.data.id);
+
+ 
+			        }
+
+				});
+				
+				$("#reference_name", $sel.body).autocomplete({
+		            
+		            minChars: 3,
+		            showNoSuggestionNotice: true,
+		            noSuggestionNotice: "No results in DataBase",
+		            serviceUrl: '/api/component/search',
+					type: 'POST',
+
+		            formatResult: function(suggestion, currentValue) {
+						
+						var strItem = ' ';
+						
+						itemName = suggestion.value.toUpperCase().replace(currentValue.toUpperCase(), "<b>" + currentValue.toUpperCase() + "</b>");
+						
+						strItem += '<a href="#" class="search-item list-group-item" data-id="'+suggestion.data.id+'">' + '<div class="search-item-name">' + itemName + " [" + suggestion.data.producer + "]" + '</div>' + '</a>';
+						
+						return strItem;
+		            },
+		            onSelect: function(suggestion) {
+						
+						$("#hidden_ref_id").val(suggestion.data.id);
 
  
 			        }
@@ -117,3 +137,7 @@
   XREFERENCE.ratingBar.init();
   
 })(jQuery);
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip(); 
+});

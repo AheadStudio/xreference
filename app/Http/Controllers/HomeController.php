@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use URL;
 
 class HomeController extends Controller
 {
@@ -39,7 +40,7 @@ class HomeController extends Controller
 			{
 				$references = collect($component->references->all());
 				
-				if (!empty($references))
+				if ($references->isNotEmpty())
 				{
 					if ($request->factory_ref == 'on')
 				    {

@@ -171,8 +171,12 @@ return [
 		Laravel\Scout\ScoutServiceProvider::class,
 		// the driver for Elasticsearch
 		ScoutElastic\ScoutElasticServiceProvider::class,
+		// Voyager admin panel
 		TCG\Voyager\VoyagerServiceProvider::class,
+		// Extended forms from Laravelcollective
 		Collective\Html\HtmlServiceProvider::class,
+		// Exel import and export
+		Maatwebsite\Excel\ExcelServiceProvider::class,
 		'Buzz\LaravelGoogleCaptcha\CaptchaServiceProvider',
 		
         /*
@@ -235,6 +239,7 @@ return [
         'Form' => Collective\Html\FormFacade::class,
 		'Html' => Collective\Html\HtmlFacade::class,
 		'Captcha' => '\Buzz\LaravelGoogleCaptcha\CaptchaFacade',
+		'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

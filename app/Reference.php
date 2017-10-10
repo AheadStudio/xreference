@@ -22,7 +22,6 @@ class Reference extends Model
                 'fields' => [
                     'raw' => [
                         'type' => 'string',
-                        'index' => 'not_analyzed',
                     ]
                 ]
             ],
@@ -33,9 +32,9 @@ class Reference extends Model
     	'component_id',
     	'ref_component_id',
     	'user_id',
-    	'rating_id',
     	'type',
-    	'featured'
+    	'featured',
+    	'comment'
     ];
     
     public function creator(){

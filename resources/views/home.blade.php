@@ -1,16 +1,19 @@
 @extends('layouts.app')
 	
 @section('content')
-	
+
+
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
+            <div class="well hero-text">This project is intended for those who work with electronic components. In the electronic world there are many functional and direct references. Our goal is to simplify their search and your life. You can add references yourself and improve our service for you.</div>
+            
             <div class="panel panel-default">
                 
                 <div class="panel-body">
 			        {!! Form::open(['method'=>'POST', 'action'=> 'HomeController@result', 'files'=>false, 'class' => 'form-horizontal']) !!}
 			        	{{ csrf_field() }}
-			        	
+                        
 			        	@if (!Auth::guest())
 				        	<div class="form-group">
 				                <div class="col-md-1 text-right">
@@ -43,19 +46,27 @@
 							
                         </div>
                         
-                        <p>This project is intended for those who work with electronic components. In the electronic world there are many functional and direct references. Our goal is to simplify their search and your life. You can add references yourself and improve our service for you.</p>
-					
 					{!! Form::close() !!}
                 </div>
                 
             </div>
 	    </div>
+	    
 	    @if (!Auth::guest())
 		    <div class="text-center">
 		    	<a href="/reference/create" class="btn btn-primary btn-lg">+ Add my XReference</a>
 		    </div>
 		@endif
 	</div>
+	
+	@if(Session::has('reference_created'))
+		<div class="row">
+			<br>
+			<div class="col-md-10 col-md-offset-1 alert alert-warning">
+		        <p>{{session('reference_created')}}</p>
+			</div>
+		</div>
+    @endif
 </div>
 
 @endsection

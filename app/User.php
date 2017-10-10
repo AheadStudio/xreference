@@ -6,7 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use TCG\Voyager\Models\User as VoyagerUser;
 
-class User extends VoyagerUser//Authenticatable
+class User extends VoyagerUser //Authenticatable
 {
     use Notifiable;
 

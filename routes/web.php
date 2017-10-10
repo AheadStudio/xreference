@@ -25,10 +25,12 @@ Route::get('/home', function () {
 
 Route::post('/result', 'HomeController@result');
 
+Route::get('/account/upload', 'UsersController@upload');
 Route::resource('/account', 'UsersController');
 
+Route::post('/reference/import', 'ReferencesController@import');
 Route::post('/reference/rate', 'ReferencesController@rate');
-
-
 Route::resource('/reference', 'ReferencesController');
 
+
+Route::resource('/component', 'ComponentsController');
