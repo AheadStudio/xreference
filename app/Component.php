@@ -29,7 +29,8 @@ class Component extends Model
         ]
     ];    
     
-    protected $fillable = ['part_name', 'producer_id', 'package', 'status'];
+    protected $fillable = ['stored_name', 'part_name', 'producer_id', 'package', 'status'];
+    
     
     public function references(){
 	    

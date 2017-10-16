@@ -33,7 +33,7 @@
 				                	{!! Form::checkbox('factory_ref', null, false, ['id'=>'factory_ref']); !!}
 				                </div>
 				                {!! Form::label('factory_ref', 'Only manufacturer references', ['class' => 'col-md-3']) !!}
-				                
+				                {!! Form::hidden('user_id', $userId) !!}
 				            </div>
 			            @endif
 			            

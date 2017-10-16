@@ -28,12 +28,7 @@ class UsersController extends Controller
     public function index()
     {
 		$user = Auth::user();
-		//$user = User::findOrFail(Auth::id()); 
-		//$id = Auth::id();
-        //$roles = Role::lists('name','id')->all();
-
-
-        return view('account.edit', compact('user'));
+		return view('account.edit', compact('user'));
     }
 
     /**

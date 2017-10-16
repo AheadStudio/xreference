@@ -56,7 +56,13 @@
                 <div class="panel-heading">My database</div>
 				<div class="panel-body">
                     <a class="btn btn-success btn-lg btn-block" href="/account/upload" role="button"><i class="fa fa-plus-square" aria-hidden="true"></i> Upload my Database</a>
-                    <a class="btn btn-default btn-lg btn-block" href="#" role="button">Download my Database</a>
+                    
+                    {!! Form::open(['method' => 'POST', 'action' => 'ReferencesController@downloadExcel', 'class' => 'form-horizontal form-button']) !!}
+					    {{ csrf_field() }}
+					    {!! Form::hidden('user', $user->id) !!}
+					    {!! Form::submit('Download my Database', ['class'=>'btn btn-default btn-lg btn-block']) !!}
+					{!! Form::close() !!}
+                    
                 </div>
             </div>
         </div>

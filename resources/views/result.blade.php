@@ -80,8 +80,8 @@
 	                		</thead>
 	                		
 	                		<tbody>
-			                    @foreach ($referenceCollection as $references)
-				                    @foreach ($references as $reference)
+			                    @foreach ($referenceCollection as $reference)
+				                    
 				                    	@php
 					                    	$component = $reference->component;
 					                    	$replacement = $reference->replacement;
@@ -99,6 +99,7 @@
 					                    		$fullRating = number_format($fullRating, 1, '.', ' ');
 					                    		$fullRating .= ' ('.$countVotes.' votes) ';
 					                    	}
+					                    	$voted = $votes->where('user_id', Auth::id())->isEmpty();
 				                    	@endphp
 				                    	<tr class="">
 			                				<td>{{ $component->part_name }}</td>
@@ -108,13 +109,13 @@
 			                				<td>{{ $reference->type }}</td>
 			                				<td>{{ $reference->featured ? 'Yes' : 'No'}}</td>
 			                				<td>{{ $fullRating }}
-			                					@if (!Auth::guest())
+			                					@if (!Auth::guest() && $voted)
 				                					<a href="" data-id="{{ $reference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
 				                				@endif
 			                				</td>
 			                			</tr>                 		
 				                    
-				                    @endforeach
+				                    
 				                @endforeach
 		                    </tbody>
 		                    
@@ -131,8 +132,13 @@
         
         @if (!Auth::guest())
 		    <div class="text-center">
-		    	<a href="/reference/create" class="btn btn-primary btn-lg">+ Add my XReference</a>
-		    	<a href="#" class="btn btn-default btn-lg" disabled="disabled">Download result</a>
+		    	
+		    	{!! Form::open(['method' => 'POST', 'action' => 'ReferencesController@downloadExcel', 'class' => 'form-inline form-button']) !!}
+		    		<a href="/reference/create" class="btn btn-primary btn-lg">+ Add my XReference</a>
+				    {{ csrf_field() }}
+				    {!! Form::hidden('components', $referenceCollection->pluck('id')->toJson()) !!}
+				    {!! Form::submit('Download result', ['class'=>'btn btn-default btn-lg']) !!}
+				{!! Form::close() !!}
 		    </div>
 		@endif
 		
@@ -143,12 +149,12 @@
 <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
 	<div class="modal-dialog modal-sm" role="document">
 		<div class="modal-content">
-			{!! Form::open(['action'=> 'ReferencesController@rate']) !!}
+			{!! Form::open(['method' => 'POST', 'action'=> 'ReferencesController@rate']) !!}
 	        	
 	        	<div class="modal-body">
-	        		
 	        		{{ csrf_field() }}
-	        		{!! Form::hidden('reference_id', null, ['class' => 'rate-reference']); !!}
+	        		{!! Form::hidden('reference_id', null); !!}
+	        		{!! Form::hidden('query', null); !!}
 	        		<div class="form-group text-center">
 		                {!! Form::label('rate', 'Rate this reference', ['class' => 'control-label']) !!}
 		                {!! Form::selectRange('rate', 1, 5, null, ['class'=>'rating-bar'])!!}
