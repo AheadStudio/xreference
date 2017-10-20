@@ -125,9 +125,8 @@ class ReferencesController extends Controller
             'reference_id' =>$request->reference_id
 
         ];
-
-
-        Rating::create($data);
+		
+		Rating::create($data);
 
         $request->session()->flash('reply_message','Your reply has been submitted and is waiting moderation');
 	    
