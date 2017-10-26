@@ -107,9 +107,9 @@ class HomeController extends Controller
      *
      * @return \App\Reference with additional data
      */
-    public function getSubreferences($reference){
+    public function getSubreferences($reference, $from = "replacement"){
 	    
-	    foreach ($reference->replacement->references as $reference_2){
+	    foreach ($reference->$from->references as $reference_2){
 	    	$subreferences[] = $reference_2;
 	    }
 	    if (!empty($subreferences)){
@@ -125,19 +125,34 @@ class HomeController extends Controller
 	    // make subqueries
 	    $partName = preg_replace('/[^A-Za-z0-9]/', '', $request->part_name);
 	    $queryLength = strlen($partName); 
-	    $possibleParts[] = $partName;
+	    $possibleParts = [];
 	    $impossibleParts = [];
+	    $componentsCollection = Collection::make();
+		$referenceCollection = Collection::make();
 	    
-	    for ($i = 1; $i <= $queryLength-3; $i++) {
-		    $possibleParts[] = substr($partName, 0, -$i);
-		    $impossibleParts[] = substr($partName, $i);
-		}
+	    
+		
+		$components = \App\Component::where('stored_name', $partName)
+               ->take(70)
+               ->select('id', 'part_name', 'stored_name')
+               ->get();
+		// add the query to result
+		$components->map(function ($component) use ($partName) {
+		    $component['query'] = $partName;
+		    return $component;
+		});
+		$componentsCollection = $componentsCollection->merge($components);
+		
+		//dd($componentsCollection->isEmpty());
 		
 		// get all components match that queries
-		if (!empty($possibleParts)){
-		    
-		    $componentsCollection = Collection::make();
-		    $referenceCollection = Collection::make();
+		if ($componentsCollection->isEmpty()){
+			
+		    //dd($componentsCollection);
+		    for ($i = 1; $i <= $queryLength-3; $i++) {
+			    $possibleParts[] = substr($partName, 0, -$i);
+			    $impossibleParts[] = substr($partName, $i);
+			}
 		    
 		    foreach ($possibleParts as $partNumber){
 			   
@@ -171,12 +186,10 @@ class HomeController extends Controller
 			
 			$componentsCollection = $componentsCollection->unique('id');
 			
-		} else {
-		    return back()->with('error', 'No query!');
 		}
 	    
 	    // get references for all found components
-	    if (!empty($componentsCollection)){
+	    if ($componentsCollection->isNotEmpty()){
 		    
 	    	
 		    foreach ($componentsCollection as $component)
@@ -185,6 +198,7 @@ class HomeController extends Controller
 				
 				// get references to that component
 				$references = $component->references;
+				
 				// add the query to result
 				$references->map(function ($reference) use ($query) {
 				    $reference['query'] = $query;
@@ -222,43 +236,103 @@ class HomeController extends Controller
 				}
 				
 				
-				
-				
-				$referenceCollection->map(function ($reference) {
+				$referenceCollection->map(function ($reference) use ($possibleParts) {
 				    
 				    // fill references with data
 				    $reference = $this->fillReference($reference);
-				    
-				    // get references to the references and so on (digging dipper)
-				    if (!empty($reference->replacement->references)){
-					    $reference = $this->getSubreferences($reference);
-					    
-					    if ($reference->subreferences){
-						    //dd($reference->subreferences);
-						    $reference->subreferences->map(function ($subreference) {
-						    	$subreference = $this->fillReference($subreference);
-						    	
-						    	
-						    	if (!Auth::guest() && !empty($subreference->replacement->references)){
-							    	$subreference = $this->getSubreferences($subreference);
+				    //dd($reference);
+				    if (empty($possibleParts)){ // only when part number is equal to query
+					    // get references to the references and so on (digging dipper)
+					    if (!empty($reference->replacement->references) && !empty($reference['query'])){
+						    
+						    $reference = $this->getSubreferences($reference);
+						    
+						    if ($reference->subreferences){
+							    //dd($reference->subreferences);
+							    $reference->subreferences = $reference->subreferences->where('id', '<>', $reference->id);
+							    //dd($test);
+							    $reference->subreferences->map(function ($subreference) {
+							    	$subreference = $this->fillReference($subreference);
 							    	
-							    	if ($subreference->subreferences){
-								    	$subreference->subreferences->map(function ($subreference2) {
-								    		$subreference2 = $this->fillReference($subreference2);
-								    	});
+							    	
+							    	if (!Auth::guest() && !empty($subreference->replacement->references)){
+								    	$subreference = $this->getSubreferences($subreference);
+								    	$subreference->subreferences = $subreference->subreferences->where('id', '<>', $reference->id);
+								    	if ($subreference->subreferences){
+									    	$subreference->subreferences->map(function ($subreference2) {
+									    		$subreference2 = $this->fillReference($subreference2);
+									    	});
+								    	}
 							    	}
-						    	}
-						    });
-						}
+							    });
+							}
+					    }
+					    
+					    // add references level 2
+					    if (!empty($reference->component->references) && !empty($reference['xquery'])){
+						    
+						    $reference = $this->getSubreferences($reference, "component");
+						    //dd($reference);
+						    $reference->subreferences = $reference->subreferences->where('id', '<>', $reference->id);
+							//dd($reference);
+						    if ($reference->subreferences){
+							    //dd($reference->subreferences);
+							    $reference->subreferences->map(function ($subreference) {
+							    	$subreference = $this->fillReference($subreference);
+							    	
+							    	// add references level 3
+							    	if (!Auth::guest() && !empty($subreference->replacement->references)){
+								    	$subreference = $this->getSubreferences($subreference);
+								    	
+								    	if ($subreference->subreferences){
+									    	$subreference->subreferences->map(function ($subreference2) {
+									    		$subreference2 = $this->fillReference($subreference2);
+									    	});
+								    	}
+							    	}
+							    });
+							}
+					    }					   
 				    }
-				    
-				    
 				    
 				    return $reference;
 				});
 				
-				//dd($referenceCollection[0]);			                    
-
+				// filter references level 3
+				if (!Auth::guest()){
+					$allRefs = [];
+					$references3 = Collection::make();
+					// writh all level 1 references ids
+					$allRefs = array_merge($allRefs, $referenceCollection->pluck('id')->all());
+					
+					// write all lvl 2 references ids
+					foreach ($referenceCollection as $reference){	
+						if ($reference->subreferences){
+							$allRefs = array_merge($allRefs, $reference->subreferences->pluck('id')->all());					
+						}
+					}
+					
+					// get all lvl 3 references
+					foreach ($referenceCollection as $reference){
+						//$subreferences = Collection::make();
+						if ($reference->subreferences){
+							foreach ($reference->subreferences as $reference2){
+								
+								$subreferences = $reference2->subreferences;
+								
+								if ($subreferences){
+									$subreferences = $subreferences->whereNotIn('id', $allRefs);
+									$allRefs = array_merge($allRefs, $subreferences->pluck('id')->all());
+									$references3 = $references3->concat($subreferences);
+									
+									//dd($references3, $allRefs);	
+								}
+							}
+						}
+					}
+					//dd($references3, $allRefs);
+					//dd($referenceCollection);		                    
+				}
 			}
 			
 	    } else {
@@ -268,6 +342,6 @@ class HomeController extends Controller
 	    }
 	    
 	    //dd($referenceCollection);
-        return view('result', compact('referenceCollection'));
+        return view('result', compact('referenceCollection', 'references3'));
     }
 }

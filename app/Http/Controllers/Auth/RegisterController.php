@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use App\Mail\Welcome;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Container\Container;
+use Illuminate\Mail\Markdown;
 
 class RegisterController extends Controller
 {
@@ -63,11 +66,17 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
             'company_name' => $data['company_name']
         ]);
+        
+        
+        \Mail::to($user)->send(new Welcome($user));
+        //event(new UserRegistered($user));
+        
+        return $user;
     }
 }

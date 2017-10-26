@@ -80,107 +80,97 @@
 	                		</thead>
 	                		
 	                		<tbody>
+								
+								<!-- References -->
 			                    @foreach ($referenceCollection as $reference)
 				                    
-				                    	@php
-					                    	$component = $reference->component;
-					                    	$replacement = $reference->replacement;
-				                    	@endphp
-				                    	
-				                    	<tr class="">
-			                				<td>
-			                					@if ($reference["query"])
-				                					<b>{{ $component->part_name }}</b>&nbsp
-				                					@if (!empty($reference->subreferences))
-					                					<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapse_{{ $reference["id"] }}" aria-expanded="false" aria-controls="collapse_{{ $reference["id"] }}" >
-						                					<i class="fa fa-chevron-down" aria-hidden="true"></i>
-						                				</button>
+			                    	@php
+				                    	$component = $reference->component;
+				                    	$replacement = $reference->replacement;
+			                    	@endphp
+			                    	
+			                    	<tr class="">
+		                				<td>
+		                					@if ($reference["query"])
+			                					({{ $reference->id }}) <b>{{ $component->part_name }}</b>
+			                				@else
+			                					({{ $reference->id }}) {{ $component->part_name }}
+			                				@endif 
+			                			</td>
+		                				<td>{{ $component->producer ? $component->producer->display_name : 'noname'}}</td>
+		                				<td>
+		                					@if ($reference["xquery"])
+			                					<b>{{ $replacement->part_name }}</b>
+			                				@else
+			                					{{ $replacement->part_name }}
+			                				@endif 
+		                				</td>
+		                				<td>{{ $replacement->producer ? $replacement->producer->display_name : 'noname'}}</td>
+		                				<td>{{ $reference->type }}</td>
+		                				<td>{{ $reference->featured ? 'Yes' : 'No'}}</td>
+		                				<td>{{ $reference->fullRating }}
+		                					@if (!Auth::guest() && $reference->noVoted)
+			                					<a href="" data-id="{{ $reference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
+			                				@endif
+		                				</td>
+		                			</tr>
+		                		@endforeach	
+		                		
+		                		<!-- References Level 2 -->
+		                		@foreach ($referenceCollection as $reference)
+		                			@if (!empty($reference->subreferences))
+										
+										@foreach ($reference->subreferences as $subreference)
+			                				@php
+			                					//dd($reference);
+						                    	$subcomponent = $subreference->component;
+						                    	$subreplacement = $subreference->replacement;
+					                    	@endphp
+				                			<tr>                		
+												
+												<td>2 ({{ $subreference->id}}) {{ $subreference->component->part_name }}</td>
+				                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
+				                				<td>{{ $subreference->replacement->part_name }}</td>
+				                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
+				                				<td>{{ $subreference->type }}</td>
+				                				<td>{{ $subreference->featured ? 'Yes' : 'No'}}</td>
+				                				<td>{{ $subreference->fullRating }}
+				                					@if (!Auth::guest() && $subreference->noVoted)
+					                					<a href="" data-id="{{ $subreference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
 					                				@endif
-				                				@else
-				                					{{ $component->part_name }}
-				                				@endif 
-				                			</td>
-			                				<td>{{ $component->producer ? $component->producer->display_name : 'noname'}}</td>
-			                				<td>
-			                					@if ($reference["xquery"])
-				                					<b>{{ $replacement->part_name }}</b>
-				                				@else
-				                					{{ $replacement->part_name }}
-				                				@endif 
-			                				</td>
-			                				<td>{{ $replacement->producer ? $replacement->producer->display_name : 'noname'}}</td>
-			                				<td>{{ $reference->type }}</td>
-			                				<td>{{ $reference->featured ? 'Yes' : 'No'}}</td>
-			                				<td>{{ $reference->fullRating }}
-			                					@if (!Auth::guest() && $reference->noVoted)
-				                					<a href="" data-id="{{ $reference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
+				                				</td>
+					                			
+				                			</tr>
+				                			
+			                			@endforeach
+		                			@endif
+				                @endforeach
+				                
+				                <!-- References Level 3 -->
+		                		@if (!Auth::guest())
+			                		@foreach ($references3 as $reference3)
+			                			
+		                				@php
+		                					$subcomponent = $reference3->component;
+					                    	$subreplacement = $reference3->replacement;
+				                    	@endphp
+			                			
+			                			<tr>                		
+											<td>3 ({{ $reference3->id}}) {{ $reference3->component->part_name }}</td>
+			                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
+			                				<td>{{ $reference3->replacement->part_name }}</td>
+			                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
+			                				<td>{{ $reference3->type }}</td>
+			                				<td>{{ $reference3->featured ? 'Yes' : 'No'}}</td>
+			                				<td>{{ $reference3->fullRating }}
+			                					@if (!Auth::guest() && $reference3->noVoted)
+				                					<a href="" data-id="{{ $reference3->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
 				                				@endif
 			                				</td>
-			                			</tr>
-			                			@if (!empty($reference->subreferences))
-				                			
-				                			@foreach ($reference->subreferences as $subreference)
-				                				@php
-							                    	$subcomponent = $subreference->component;
-							                    	$subreplacement = $subreference->replacement;
-						                    	@endphp
-					                			<tr class="collapse" id="collapse_{{ $reference["id"] }}">                		
-													
-													<td>{{ $subreference->component->part_name }}&nbsp
-					                					@if (!empty($subreference->subreferences))
-						                					<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapse_{{ $subreference["id"] }}" aria-expanded="false" aria-controls="collapse_{{ $subreference["id"] }}" >
-							                					<i class="fa fa-chevron-down" aria-hidden="true"></i>
-							                				</button>
-						                				@endif
-													</td>
-					                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
-					                				<td>{{ $subreference->replacement->part_name }}</td>
-					                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
-					                				<td>{{ $subreference->type }}</td>
-					                				<td>{{ $subreference->featured ? 'Yes' : 'No'}}</td>
-					                				<td>{{ $subreference->fullRating }}
-					                					@if (!Auth::guest() && $subreference->noVoted)
-						                					<a href="" data-id="{{ $subreference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
-						                				@endif
-					                				</td>
-						                			
-					                			</tr>
-					                			
-					                			@if (!empty($subreference->subreferences))
-				                			
-						                			@foreach ($subreference->subreferences as $subreference2)
-						                				@php
-						                					
-									                    	$subcomponent = $subreference2->component;
-									                    	$subreplacement = $subreference2->replacement;
-								                    	@endphp
-							                			<tr class="collapse" id="collapse_{{ $subreference["id"] }}">                		
-															
-															<td>{{ $subreference2->component->part_name }}&nbsp
-							                					@if (!empty($subreference2->subreferences))
-								                					<button class="btn btn-default btn-xs" type="button" data-toggle="collapse" data-target="#collapse_{{ $subreference["id"] }}" aria-expanded="false" aria-controls="collapse_{{ $subreference["id"] }}" >
-									                					<i class="fa fa-chevron-down" aria-hidden="true"></i>
-									                				</button>
-								                				@endif
-															</td>
-							                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
-							                				<td>{{ $subreference2->replacement->part_name }}</td>
-							                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
-							                				<td>{{ $subreference2->type }}</td>
-							                				<td>{{ $subreference2->featured ? 'Yes' : 'No'}}</td>
-							                				<td>{{ $subreference2->fullRating }}
-							                					@if (!Auth::guest() && $subreference2->noVoted)
-								                					<a href="" data-id="{{ $subreference2->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
-								                				@endif
-							                				</td>
-								                			
-							                			</tr>
-						                			@endforeach
-					                			@endif
-					                			
-				                			@endforeach
-			                			@endif
-				                @endforeach
+				                		</tr>
+	
+					                @endforeach
+				                @endif
 		                    </tbody>
 		                    
 		                </table>
