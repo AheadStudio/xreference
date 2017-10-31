@@ -87,24 +87,35 @@
 			                    	@php
 				                    	$component = $reference->component;
 				                    	$replacement = $reference->replacement;
+				                    	if ($reference["query"]){
+					                    	$keyword = $reference->query;
+				                    	} else {
+					                    	$keyword = $reference->xquery;
+				                    	}
+				                    	$searchedNameComponent = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $component->part_name);
+				                    	$searchedNameReplaced = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $replacement->part_name);
+				                    	
+				                    	//dd($reference);
 			                    	@endphp
 			                    	
-			                    	<tr class="">
+			                    	<tr class="warning">
 		                				<td>
 		                					@if ($reference["query"])
-			                					({{ $reference->id }}) <b>{{ $component->part_name }}</b>
+			                					{!! $searchedNameComponent !!}
 			                				@else
-			                					({{ $reference->id }}) {{ $component->part_name }}
+			                					{{ $component->part_name }}
 			                				@endif 
 			                			</td>
 		                				<td>{{ $component->producer ? $component->producer->display_name : 'noname'}}</td>
 		                				<td>
 		                					@if ($reference["xquery"])
-			                					<b>{{ $replacement->part_name }}</b>
+			                					{!! $searchedNameReplaced !!}
 			                				@else
 			                					{{ $replacement->part_name }}
 			                				@endif 
 		                				</td>
+		                				
+		                				
 		                				<td>{{ $replacement->producer ? $replacement->producer->display_name : 'noname'}}</td>
 		                				<td>{{ $reference->type }}</td>
 		                				<td>{{ $reference->featured ? 'Yes' : 'No'}}</td>
@@ -126,9 +137,9 @@
 						                    	$subcomponent = $subreference->component;
 						                    	$subreplacement = $subreference->replacement;
 					                    	@endphp
-				                			<tr>                		
+				                			<tr class="success">                		
 												
-												<td>2 ({{ $subreference->id}}) {{ $subreference->component->part_name }}</td>
+												<td>{{ $subreference->component->part_name }}</td>
 				                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
 				                				<td>{{ $subreference->replacement->part_name }}</td>
 				                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
@@ -155,8 +166,8 @@
 					                    	$subreplacement = $reference3->replacement;
 				                    	@endphp
 			                			
-			                			<tr>                		
-											<td>3 ({{ $reference3->id}}) {{ $reference3->component->part_name }}</td>
+			                			<tr class="danger">                		
+											<td>{{ $reference3->component->part_name }}</td>
 			                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
 			                				<td>{{ $reference3->replacement->part_name }}</td>
 			                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>

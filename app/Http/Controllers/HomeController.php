@@ -123,6 +123,7 @@ class HomeController extends Controller
     {
 	    //dd($request);
 	    // make subqueries
+	    $initialPartName = $request->part_name;
 	    $partName = preg_replace('/[^A-Za-z0-9]/', '', $request->part_name);
 	    $queryLength = strlen($partName); 
 	    $possibleParts = [];
@@ -137,8 +138,9 @@ class HomeController extends Controller
                ->select('id', 'part_name', 'stored_name')
                ->get();
 		// add the query to result
-		$components->map(function ($component) use ($partName) {
+		$components->map(function ($component) use ($partName, $initialPartName) {
 		    $component['query'] = $partName;
+		    $component['initialQuery'] = $initialPartName;
 		    return $component;
 		});
 		$componentsCollection = $componentsCollection->merge($components);
@@ -149,24 +151,42 @@ class HomeController extends Controller
 		if ($componentsCollection->isEmpty()){
 			
 		    //dd($componentsCollection);
+		    $croppedPartName = $initialPartName;
+		    $k = 0;
 		    for ($i = 1; $i <= $queryLength-3; $i++) {
-			    $possibleParts[] = substr($partName, 0, -$i);
-			    $impossibleParts[] = substr($partName, $i);
+			    
+			    $croppedPartName = substr($initialPartName, 0, -$i-$k);
+			    if (substr($croppedPartName, -1) == '-' ||
+			    	substr($croppedPartName, -1) == '.' ||
+			    	substr($croppedPartName, -1) == ',' ||
+			    	substr($croppedPartName, -1) == '(' ||
+			    	substr($croppedPartName, -1) == ')' ){
+					$k++;
+					$croppedPartName = trim($croppedPartName, "()-,.");
+				}
+			    $possibleParts[$i]["QUERY"] = substr($partName, 0, -$i);
+			    $possibleParts[$i]["PART_NAME"] = $croppedPartName;
+			    
+			    $impossibleParts[$i] = substr($partName, $i);
 			}
-		    
+			//dd($possibleParts);
+			
 		    foreach ($possibleParts as $partNumber){
 			   
-			    $components = \App\Component::where('stored_name', 'like', '%'.$partNumber.'%')
+			    $components = \App\Component::where('stored_name', 'like', '%'.$partNumber["QUERY"].'%')
 		               ->take(50)
 		               ->select('id', 'part_name', 'stored_name')
 		               ->get();
 				// add the query to result
 				$components->map(function ($component) use ($partNumber) {
-				    $component['query'] = $partNumber;
+				    $component['query'] = $partNumber["QUERY"];
+				    $component['initialQuery'] = $partNumber["PART_NAME"];
 				    return $component;
 				});
 				$componentsCollection = $componentsCollection->merge($components);
-				
+				if ($componentsCollection->isNotEmpty()){
+					break;
+				}
 			}
 			
 			if ($componentsCollection->isEmpty()){
@@ -195,6 +215,7 @@ class HomeController extends Controller
 		    foreach ($componentsCollection as $component)
 			{
 				$query = $component["query"];
+				$initialQuery = $component["initialQuery"];
 				
 				// get references to that component
 				$references = $component->references;
@@ -212,6 +233,12 @@ class HomeController extends Controller
 				    return $reference;
 				});
 				$references = $references->merge($referenceTo);
+				
+				// add the initial query to result
+				$references->map(function ($reference) use ($initialQuery) {
+				    $reference['initialPartName'] = $initialQuery;
+				    return $reference;
+				});
 				
 				// apply filters
 				if ($references->isNotEmpty())
@@ -342,6 +369,7 @@ class HomeController extends Controller
 	    }
 	    
 	    //dd($referenceCollection);
-        return view('result', compact('referenceCollection', 'references3'));
+	   //echo "<pre>"; print_r ($referenceCollection); echo "</pre>";
+        return view('result', compact('referenceCollection', 'references3', 'initialPartName'));
     }
 }
