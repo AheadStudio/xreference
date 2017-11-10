@@ -63,7 +63,7 @@
                         </div>
                     @endif
 					
-					@if(!empty($referenceCollection))
+					@if(!empty($result))
 					
 	                    <table class="table table-hover">
 	                		
@@ -80,11 +80,15 @@
 	                		</thead>
 	                		
 	                		<tbody>
+							
+							<!-- Lists (levels) -->
+							@foreach ($result as $key => $references)
 								
 								<!-- References -->
-			                    @foreach ($referenceCollection as $reference)
+			                    @foreach ($references as $reference)
 				                    
 			                    	@php
+			                    		
 				                    	$component = $reference->component;
 				                    	$replacement = $reference->replacement;
 				                    	if ($reference["query"]){
@@ -92,16 +96,28 @@
 				                    	} else {
 					                    	$keyword = $reference->xquery;
 				                    	}
-				                    	$searchedNameComponent = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $component->part_name);
-				                    	$searchedNameReplaced = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $replacement->part_name);
 				                    	
-				                    	//dd($reference);
+				                    	//$searchedNameComponent = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $component->part_name);
+				                    	//$searchedNameReplaced = preg_replace("/\w*".preg_quote($reference->initialPartName)."\w*/i", "<b>$0</b>", $replacement->part_name);
+				                    	//dd($references);
+				                    	
+				                    	// coloring
+				                    	if ($key === "FINAL"){
+					                    	$class = "success";
+				                    	} elseif ($key == 0) {
+					                    	$class = "info";
+				                    	} elseif ($key == 1) {
+					                    	$class = "danger";
+				                    	} else {
+					                    	$class = "warning";
+				                    	}
+				                    	
 			                    	@endphp
 			                    	
-			                    	<tr class="warning">
+			                    	<tr class="{{ $class }}">
 		                				<td>
 		                					@if ($reference["query"])
-			                					{!! $searchedNameComponent !!}
+			                					<b>{!! $component->part_name !!}</b>
 			                				@else
 			                					{{ $component->part_name }}
 			                				@endif 
@@ -109,7 +125,7 @@
 		                				<td>{{ $component->producer ? $component->producer->display_name : 'noname'}}</td>
 		                				<td>
 		                					@if ($reference["xquery"])
-			                					{!! $searchedNameReplaced !!}
+			                					<b>{!! $replacement->part_name !!}</b>
 			                				@else
 			                					{{ $replacement->part_name }}
 			                				@endif 
@@ -126,62 +142,8 @@
 		                				</td>
 		                			</tr>
 		                		@endforeach	
-		                		
-		                		<!-- References Level 2 -->
-		                		@foreach ($referenceCollection as $reference)
-		                			@if (!empty($reference->subreferences))
-										
-										@foreach ($reference->subreferences as $subreference)
-			                				@php
-			                					//dd($reference);
-						                    	$subcomponent = $subreference->component;
-						                    	$subreplacement = $subreference->replacement;
-					                    	@endphp
-				                			<tr class="success">                		
-												
-												<td>{{ $subreference->component->part_name }}</td>
-				                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
-				                				<td>{{ $subreference->replacement->part_name }}</td>
-				                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
-				                				<td>{{ $subreference->type }}</td>
-				                				<td>{{ $subreference->featured ? 'Yes' : 'No'}}</td>
-				                				<td>{{ $subreference->fullRating }}
-				                					@if (!Auth::guest() && $subreference->noVoted)
-					                					<a href="" data-id="{{ $subreference->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
-					                				@endif
-				                				</td>
-					                			
-				                			</tr>
-				                			
-			                			@endforeach
-		                			@endif
-				                @endforeach
-				                
-				                <!-- References Level 3 -->
-		                		@if (!Auth::guest())
-			                		@foreach ($references3 as $reference3)
-			                			
-		                				@php
-		                					$subcomponent = $reference3->component;
-					                    	$subreplacement = $reference3->replacement;
-				                    	@endphp
-			                			
-			                			<tr class="danger">                		
-											<td>{{ $reference3->component->part_name }}</td>
-			                				<td>{{ $subcomponent->producer ? $subcomponent->producer->display_name : 'noname'}}</td>
-			                				<td>{{ $reference3->replacement->part_name }}</td>
-			                				<td>{{ $subreplacement->producer ? $subreplacement->producer->display_name : 'noname'}}</td>
-			                				<td>{{ $reference3->type }}</td>
-			                				<td>{{ $reference3->featured ? 'Yes' : 'No'}}</td>
-			                				<td>{{ $reference3->fullRating }}
-			                					@if (!Auth::guest() && $reference3->noVoted)
-				                					<a href="" data-id="{{ $reference3->id }}" class="btn btn-vote btn-primary btn-sm" data-toggle="modal" data-target=".bs-example-modal-sm">Vote</a>
-				                				@endif
-			                				</td>
-				                		</tr>
-	
-					                @endforeach
-				                @endif
+		                	
+		                	@endforeach
 		                    </tbody>
 		                    
 		                </table>
@@ -201,7 +163,7 @@
 		    	{!! Form::open(['method' => 'POST', 'action' => 'ReferencesController@downloadExcel', 'class' => 'form-inline form-button']) !!}
 		    		<a href="/reference/create" class="btn btn-primary btn-lg">+ Add my XReference</a>
 				    {{ csrf_field() }}
-				    {!! Form::hidden('components', $referenceCollection->pluck('id')->toJson()) !!}
+				    {!! Form::hidden('components', $references->pluck('id')->toJson()) !!}
 				    {!! Form::submit('Download result', ['class'=>'btn btn-default btn-lg']) !!}
 				{!! Form::close() !!}
 		    </div>

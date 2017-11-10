@@ -4,6 +4,7 @@ namespace App;
 
 use ScoutElastic\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Reference extends Model
 {
@@ -61,5 +62,18 @@ class Reference extends Model
 	    
 	    return $this->belongsToMany('App\Stock');
 	    
+    }
+    
+    /**
+     * Get references for the replacement
+     *
+     * @return Collection
+     */
+    public function getSubreferences($from = "replacement"){
+	    
+	    $subreferences = Collection::make();
+        $subreferences = $subreferences->merge($this->$from->references);
+        
+        return $subreferences;   
     }
 }

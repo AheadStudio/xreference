@@ -24,53 +24,482 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index(){
+	    
 	    $userId = Auth::id();
 	    return view('home', compact('userId'));
     }
     
-    public function elasticResult(Request $request)
-    {
+    /**
+     * A.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function result(Request $request){
+    	
+    	$allRefs = [];
+    	
+    	// fill search array with first search word
+    	$words[0][] = $request->part_name;
+    	
+    	$initialPartName = $request->part_name; # !dunno why, check view, then delete
+    	
+    	// define depths of the search
+    	if (Auth::guest()){
+	    	$levels = 2;
+	    } else {
+		    $levels = 3;
+	    }
 	    
-	    $components = \App\Component::search($request->part_name)->get()->all();
-	    
-	    if (!empty($components)){
-		    
-	    
-		    foreach ($components as $component)
-			{
-				$references = collect($component->references->all());
+    	for ($i = 0; $i < $levels; $i++) {
+	    	
+	    	$result[$i] = Collection::make();
+	    	
+	    	foreach ($words[$i] as $key => $word){
+		    	
+		    	$references = [];
+		    	
+		    	// generate array of the queries from word
+		    	$queries = $this->splitString($word);
+		    	
+		    	if ($i == 0){ $remainQuries = $queries; }
+		    	
+		    	foreach ($queries as $key => $query){
+			    	
+			    	// save remain queries for First Level Pattern Search (end step)
+			    	if ($i == 0 && ($currentQ = array_search($query, $remainQuries)) !== false){
+				    	unset($remainQuries[$currentQ]);
+					}
+					
+					// strict search
+			    	$references = $this->searchStrict($query);
+			    	
+			    	// delete repeats
+			    	$references = $references->whereNotIn('id', $allRefs);
+
+			    	// stop on first strict match
+			    	if ($references->isNotEmpty()){ 
+				    	break 1;
+				    }
+				}
 				
-				if ($references->isNotEmpty())
-				{
-					if ($request->factory_ref == 'on')
-				    {
-						$references = collect($references->where('featured', 1)->all());
-				    }
+				
+				// continue searching by pattern
+				if ($references->isEmpty()){
+					foreach ($queries as $key => $query){
+				    	
+				    	// save remain queries for First Level Pattern Search (end step)
+				    	if ($i == 0 && ($currentQ = array_search($query, $remainQuries)) !== false){
+					    	unset($remainQuries[$currentQ]);
+						}
+						
+						// pattern search
+				    	$references = $this->searchPattern($query);
+				    	
+				    	// delete repeats
+						$references = $references->whereNotIn('id', $allRefs);
+						
+				    	// stop on first strict match
+				    	if ($references->isNotEmpty()){
+					    	//if ($i == 2){ dd($references, $allRefs); }
+					    	break 1;
+					    }
+					}
+		    	}
+		    	
+				// writh all searched references ids
+				$allRefs = array_merge($allRefs, $references->pluck('id')->all());
+				
+		    	$result[$i] = $result[$i]->merge($references);
+		    	
+		    	
+		    	// generate searching words from result
+				$allWords = $this->generateStrings($references);
+				
+				// exclude repeats
+				$words[$i+1] = array_diff($allWords, $words[$i], $words[0]); # !It needs to be more intelligent
+				
+	    	}
+	    	
+    	}
+		
+		
+		
+		// First Level Pattern Search
+		if (!empty($remainQuries)){
+			foreach ($remainQuries as $query){
+				
+				$finalReferences = $this->searchPattern($query);
+		    	$finalReferences = $finalReferences->whereNotIn('id', $allRefs);
+		    	
+		    	// stop on first strict match
+		    	if ($finalReferences->isNotEmpty()){
+			    	//dd($finalReferences);
+			    	break 1;
+			    }
+			}
+			$result["FINAL"] = $finalReferences;
+		}
+		
+		//dd($result);
+		return view('result', compact('result', 'initialPartName'));
+    }
+
+    /**
+     * S.
+     *
+     * @return Collection
+     */
+    public function generateStrings($references){
+	    
+	    $words = [];
+	    
+	    foreach ($references as $reference){
+		    
+		    // get references to REPLACEMENT
+		    if ($reference->query){
+				
+				$words[] = $reference->replacement->part_name;
+			// get references to COMPONENT  
+		    } elseif ($reference->xquery){
+			    
+			    $words[] = $reference->component->part_name;
+			
+			// how the hell..
+		    } else {
+			    $words[] = 'This is a bug!';
+		    }
+	    }
+	    
+	    return($words);
+	}    
+    
+    /**
+     * Search references by part number ant show them.
+     *
+     * @return Collection
+     */
+    public function searchStrict($query){
+		
+		$references = Collection::Make(); 
+		
+		// take components by part name
+		$components = \App\Component::where('stored_name', $query["QUERY"])
+           ->take(50)
+           ->select('id', 'part_name', 'stored_name')
+           ->get();
+	    
+	    // get references
+	    if ($components->isNotEmpty()){
+		    foreach ($components as $component){
+			    
+			    // get references to that component and mark them
+				$references = $component->references;
+				$references->map(function ($reference) use ($query) {
+					$reference = $this->fillReference($reference);
+				    $reference['query'] = $query["QUERY"];
+				    $reference['initialPartName'] = $query["PART_NAME"];
+				    return $reference;
+				});
+				
+				// get references with that component as reference
+				$referenceTo = $component->referenceTo;
+				$referenceTo->map(function ($reference) use ($query) {
+					$reference = $this->fillReference($reference);
+				    $reference['xquery'] = $query["QUERY"];
+				    $reference['initialPartName'] = $query["PART_NAME"];
 				    
-				    if ($request->pin_ref == 'on')
-				    {
-						$references = collect($references->where('type', 'direct')->all());
-				    }
+				    return $reference;
+				});
+				
+				$references = $references->merge($referenceTo);
+				
+			}
+		}
+		
+		//dd($references);
+		return $references;
+		
+	}
+    
+    /**
+     * Search references by part number ant show them.
+     *
+     * @return Collection
+     */
+    public function searchPattern($query){
+	    
+	    $components = Collection::make();
+		$result = Collection::make();
+		
+	    // get components
+		$components = \App\Component::where('stored_name', 'like', '%'.$query["QUERY"].'%')
+               ->take(50)
+               ->select('id', 'part_name', 'stored_name')
+               ->get();
+		
+		// get references
+		if ($components->isNotEmpty()){
+			
+			foreach ($components as $component){
+				
+				$references = Collection::make();
+				
+				// get references to that component and mark them
+				$references = $component->references;
+				$references->map(function ($reference) use ($query) {
+					$reference = $this->fillReference($reference);
+				    $reference['query'] = $query["QUERY"];
+				    $reference['initialPartName'] = $query["PART_NAME"];
+				    return $reference;
+				});
+				
+				// get references with that component as reference
+				$referenceTo = $component->referenceTo;
+				$referenceTo->map(function ($reference) use ($query) {
+					$reference = $this->fillReference($reference);
+				    $reference['xquery'] = $query["QUERY"];
+				    $reference['initialPartName'] = $query["PART_NAME"];
+				});
+				
+				$references = $references->merge($referenceTo);
+				$result = $result->merge($references);
+			}
+		}
+		
+		return $result;
+	}
+    
+    public function resultOld2(Request $request)
+    {
+		$references = Collection::make();
+		$similarReferences = Collection::make();
+		$componentsLike = [];
+		
+		// get array of possible queries
+		$queries = $this->splitString($request->part_name);
+	    
+	    // get exact matching components 
+	    foreach ($queries as $key => $query){
+		    
+		    unset($queries[$key]);
+		    $safeQueries[] = $query;
+		    
+		    $components = \App\Component::where('stored_name', $query["QUERY"])
+               ->take(50)
+               ->select('id', 'part_name', 'stored_name')
+               ->get();
+		    
+		    
+		    if ($components->isNotEmpty()){
+			    
+			    foreach ($components as $component){
 					
-					if ($request->my_ref == 'on')
-				    {
-					    $userId = Auth::id();
-						$references = collect($references->where('user_id', $userId)->all());
-				    }
+					// get references to that component and mark them
+					$references = $component->references;
+					$references->map(function ($reference) use ($query) {
+					    $reference['query'] = $query["QUERY"];
+					    $reference['initialPartName'] = $query["PART_NAME"];
+					    return $reference;
+					});
 					
-					$referenceCollection[$component->id] = $references;
+					// get references lvl 1 with that component as reference
+					$referenceTo = $component->referenceTo;
+					//$referenceTo->map(function ($reference) use ($query) {
+					foreach ($referenceTo as &$reference){
+					    $reference['xquery'] = $query["QUERY"];
+					    $reference['initialPartName'] = $query["PART_NAME"];
+					    
+					    // get references lvl 2
+					    $references2 = $reference->getSubreferences('component');
+					    // fill them with info
+					    $references2->map(function ($reference2) {
+						    $reference2 = $this->fillReference($reference2);
+						    
+					    });
+					    $reference['subreferences'] = $references2;  
+					    
+					    //return $reference;
+					}
+					
+					$references = $references->merge($referenceTo);
+				}	
+				
+				break; // stop searching on a first match
+			}
+	    }
+	    
+	    
+	    //dd($references2);
+	    
+	    // get references level 3
+	    $references3 = Collection::make();
+		if (!Auth::guest()){
+			
+			$allRefs = [];
+			// writh all level 1 references ids
+			$allRefs = array_merge($allRefs, $references->pluck('id')->all());
+			// write all lvl 2 references ids
+			foreach ($references as $reference){	
+				if ($reference->subreferences){
+					$allRefs = array_merge($allRefs, $reference->subreferences->pluck('id')->all());	
 				}
 			}
 			
-	    } else {
+			$references3 = Collection::make();
 			
-			$referenceCollection = [];
-		    
+			// get all lvl 3 references
+			foreach ($references as $reference){
+				
+				if ($reference->subreferences){
+					$references2 = $reference->getSubreferences('component');
+					
+					//dd($references2);
+					
+					foreach ($references2 as $reference2){
+						$references3 = $references3->merge($reference2->getSubreferences());
+					}
+				}
+			}
+			//dd($references3);
+			if ($references3->isNotEmpty()){
+				
+				//$references3 = $references3->unique();
+				//$references3 = $references3->whereNotIn('id', $allRefs);
+				
+				//dd($references3, $allRefs);	
+			}
+			//dd($references3, $allRefs);
+			//dd($referenceCollection);		                    
+		}
+		
+		
+		
+		// for not exact result
+		if (empty($queries)){
+			$queries = $safeQueries;
+		}
+		
+		// get next query by substring
+		foreach ($queries as $query){
+			
+			// get components
+			$componentsLike = \App\Component::where('stored_name', 'like', '%'.$query["QUERY"].'%')
+	               ->take(50)
+	               ->select('id', 'part_name', 'stored_name')
+	               ->get();
+			$componentsLike = $componentsLike->whereNotIn('id', $components->pluck('id'));
+			
+			// get references
+			
+			
+			if ($componentsLike->isNotEmpty()){
+				$referenceLike = Collection::make();
+				$referenceLikeTo = Collection::make();
+				
+				foreach ($componentsLike as $componentLike){
+					// get references to that component and mark them
+					$referencesLike = $componentLike->references;
+					$referencesLike->map(function ($reference) use ($query) {
+					    $reference['query'] = $query["QUERY"];
+					    $reference['initialPartName'] = $query["PART_NAME"];
+					    return $reference;
+					});
+					
+					// get references lvl 1 with that component as reference
+					$referenceLikeTo = $componentLike->referenceTo;
+					$referenceLikeTo->map(function ($reference) use ($query) {
+					    $reference['xquery'] = $query["QUERY"];
+					    $reference['initialPartName'] = $query["PART_NAME"];
+					});
+					
+					
+					$referencesLike = $referencesLike->merge($referenceLikeTo);
+					$test[] = $referencesLike;
+					$similarReferences = $similarReferences->merge($referencesLike);
+				}
+				
+				break; // stop search components after first result
+			}
+		}
+		
+	    //dd($similarReferences);
+	    
+	    return view('result', compact('references', 'references3', 'similarReferences', 'initialPartName'));
+		
+	}
+    
+    
+    
+    /**
+     * Subdivide given string to sting with length 3 by cutting chars from
+     * the end and then from the beginning. Wright result with and without
+     * symbols.
+     *
+     * @param  string  $string
+     * @return array
+     */
+    private function splitString($string){
+	    
+	    
+	    $partName = preg_replace('/[^A-Za-z0-9]/', '', $string);
+	    $queryLength = strlen($partName);
+	    
+	    // wright original query
+	    $fullString[0]["QUERY"] = $partName;
+		$fullString[0]["PART_NAME"] = $string;
+	    
+	    $possibleParts = [];
+	    $impossibleParts = [];
+	    
+	    // defence from long strings
+	    if ($queryLength > 50){
+		    return collect(["Error" => "Query must be less then 50 characters"]);
 	    }
 	    
-        return view('result', compact('referenceCollection'));
+	    // wright out cropped part name with and without symbols
+		$k = 0; // last chars
+		$j = 0; // first chars
+	    
+	    for ($i = 1; $i <= $queryLength-3; $i++) {
+		    
+		    // cut by one symbol from the end
+		    $croppedLast = substr($string, 0, -$i-$k);
+		    if (substr($croppedLast, -1) == '-' ||
+		    	substr($croppedLast, -1) == '/' ||
+		    	substr($croppedLast, -1) == '.' ||
+		    	substr($croppedLast, -1) == ',' ||
+		    	substr($croppedLast, -1) == '(' ||
+		    	substr($croppedLast, -1) == ')' )
+		    {
+				$k++;
+				$croppedLast = trim($croppedLast, "()-,.");
+			}
+			
+			// we would search by qury, but show the part name
+			$sansLast[$i]["QUERY"] = substr($partName, 0, -$i);
+		    $sansLast[$i]["PART_NAME"] = $croppedLast;
+			
+			// cut by one symbol from the beginning
+			$croppedFirst = substr($string, $i+$j);
+			if (substr($croppedFirst, 0, 1) == '-' ||
+		    	substr($croppedFirst, 0, 1) == '.' ||
+		    	substr($croppedFirst, 0, 1) == ',' ||
+		    	substr($croppedFirst, 0, 1) == '(' ||
+		    	substr($croppedFirst, 0, 1) == ')' )
+		    {
+				$j++;
+				$croppedFirst = trim($croppedFirst, "()-,.");
+			}
+			
+		    $sansFirst[$i]["QUERY"] = substr($partName, $i);
+		    $sansFirst[$i]["PART_NAME"] = $croppedFirst;
+		    
+		}
+		
+		$subdividedString = array_merge($fullString, $sansLast, $sansFirst);
+		
+		return $subdividedString;
     }
     
     /**
@@ -119,7 +548,7 @@ class HomeController extends Controller
 	    return $reference;
     }
     
-    public function result(Request $request)
+    public function resultOld(Request $request)
     {
 	    //dd($request);
 	    // make subqueries
@@ -309,8 +738,9 @@ class HomeController extends Controller
 							    	
 							    	// add references level 3
 							    	if (!Auth::guest() && !empty($subreference->replacement->references)){
-								    	$subreference = $this->getSubreferences($subreference);
 								    	
+								    	$subreference2 = $this->getSubreferences($subreference);
+								    	dd($subreference);
 								    	if ($subreference->subreferences){
 									    	$subreference->subreferences->map(function ($subreference2) {
 									    		$subreference2 = $this->fillReference($subreference2);
@@ -324,7 +754,7 @@ class HomeController extends Controller
 				    
 				    return $reference;
 				});
-				
+				//dd($referenceCollection);
 				// filter references level 3
 				if (!Auth::guest()){
 					$allRefs = [];
@@ -338,16 +768,18 @@ class HomeController extends Controller
 							$allRefs = array_merge($allRefs, $reference->subreferences->pluck('id')->all());					
 						}
 					}
+					//$subreferences = Collection::make();
 					
 					// get all lvl 3 references
 					foreach ($referenceCollection as $reference){
-						//$subreferences = Collection::make();
+						
 						if ($reference->subreferences){
 							foreach ($reference->subreferences as $reference2){
-								
+								//dd($reference2);
 								$subreferences = $reference2->subreferences;
 								
 								if ($subreferences){
+									
 									$subreferences = $subreferences->whereNotIn('id', $allRefs);
 									$allRefs = array_merge($allRefs, $subreferences->pluck('id')->all());
 									$references3 = $references3->concat($subreferences);
