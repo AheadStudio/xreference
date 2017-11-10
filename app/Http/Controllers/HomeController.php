@@ -62,7 +62,10 @@ class HomeController extends Controller
 		    	// generate array of the queries from word
 		    	$queries = $this->splitString($word);
 		    	
-		    	if ($i == 0){ $remainQuries = $queries; }
+		    	if ($i == 0){ 
+			    	$remainQuries = $queries;
+			    	$remainQuriesPattern = $queries;
+			    }
 		    	
 		    	foreach ($queries as $key => $query){
 			    	
@@ -90,7 +93,7 @@ class HomeController extends Controller
 				    	
 				    	// save remain queries for First Level Pattern Search (end step)
 				    	if ($i == 0 && ($currentQ = array_search($query, $remainQuries)) !== false){
-					    	unset($remainQuries[$currentQ]);
+					    	unset($remainQuriesPattern[$currentQ]);
 						}
 						
 						// pattern search
@@ -126,7 +129,12 @@ class HomeController extends Controller
 		
 		
 		// First Level Pattern Search
-		if (!empty($remainQuries)){
+		if (!empty($remainQuries) || !empty($remainQuriesPattern)){
+			
+			if(empty($remainQuries)){
+				$remainQuries = $remainQuriesPattern;
+			}
+			
 			foreach ($remainQuries as $query){
 				
 				$finalReferences = $this->searchPattern($query);
@@ -141,7 +149,7 @@ class HomeController extends Controller
 			$result["FINAL"] = $finalReferences;
 		}
 		
-		//dd($result);
+		//dd($remainQuriesPattern);
 		return view('result', compact('result', 'initialPartName'));
     }
 
