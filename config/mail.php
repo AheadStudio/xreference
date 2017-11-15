@@ -21,11 +21,10 @@ return [
 	    'port' => env('MAIL_PORT', 25),
 	    'from' => [
 	        'address' => 'info@goodcode.ru',
-	        'name' => 'Tony Test',
+	        'name' => 'Xreferences.info',
 	    ],
 	    'encryption' => env('MAIL_ENCRYPTION', 'null'),
-	    //'username' => env('MAIL_USERNAME', 'a.orlov@parusinform.ru'),
-	    //'password' => env('MAIL_PASSWORD', 'Gbkbuhbv#3'),
+
 
 
 

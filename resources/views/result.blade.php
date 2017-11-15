@@ -8,8 +8,8 @@
             <div class="panel panel-default">
                 
                 <div class="panel-body">
-			        {!! Form::open(['method'=>'POST', 'action'=> 'HomeController@result', 'files'=>false, 'class' => 'form-horizontal']) !!}
-			        	{{ csrf_field() }}
+			        {!! Form::open(['method'=>'GET', 'action'=> 'HomeController@result', 'files'=>false, 'class' => 'form-horizontal']) !!}
+			        	
 			        	
 			        	@if (!Auth::guest())
 				        	<div class="form-group">

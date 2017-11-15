@@ -59,11 +59,11 @@
 		@endif
 	</div>
 	
-	@if(Session::has('reference_created'))
+	@if(Session::has('homepage_message'))
 		<div class="row">
 			<br>
 			<div class="col-md-10 col-md-offset-1 alert alert-warning">
-		        <p>{{session('reference_created')}}</p>
+		        <p>{{session('homepage_message')}}</p>
 			</div>
 		</div>
     @endif

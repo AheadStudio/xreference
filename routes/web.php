@@ -22,7 +22,7 @@ Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', function () {
     return redirect()->route('home');
 });
-
+Route::post('/feedback', 'HomeController@feedback');
 Route::any('/result', 'HomeController@result');
 
 Route::get('/account/upload', 'UsersController@upload');

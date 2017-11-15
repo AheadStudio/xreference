@@ -174,6 +174,7 @@ module.exports = __webpack_require__(43);
 						noSuggestionNotice: "No results in DataBase",
 						serviceUrl: '/api/component/search',
 						type: 'POST',
+						preventBadQueries: false,
 
 						formatResult: function formatResult(suggestion, currentValue) {
 

@@ -105,7 +105,8 @@
 		            noSuggestionNotice: "No results in DataBase",
 		            serviceUrl: '/api/component/search',
 					type: 'POST',
-
+					preventBadQueries: false,
+					
 		            formatResult: function(suggestion, currentValue) {
 						
 						var strItem = ' ';

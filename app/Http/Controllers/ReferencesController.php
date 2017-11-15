@@ -64,7 +64,7 @@ class ReferencesController extends Controller
 
 		Reference::create($data);
 
-        $request->session()->flash('reference_created','New reference has been created!');
+        $request->session()->flash('homepage_message','New reference has been created!');
         
         return redirect('/');
     }
@@ -130,10 +130,7 @@ class ReferencesController extends Controller
 
         $request->session()->flash('reply_message','Your reply has been submitted and is waiting moderation');
 	    
-	    return redirect('/');
-	    //return view('result', compact('referenceCollection'));
-	    //return redirect()->back()->withInput();
-	    //return back()->withInput();
+	    return back()->withInput();
     }
     
     /**

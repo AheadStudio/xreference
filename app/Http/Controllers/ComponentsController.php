@@ -11,8 +11,12 @@ class ComponentsController extends Controller
     {
 		$result["query"] = $request->input('query');
 		
-		$components = \App\Component::search($result["query"])->get()->all();
+		//$components = \App\Component::search($result["query"])->get()->all(); // elastic
 		
+		$components = \App\Component::where('stored_name', 'like', '%'.$result["query"].'%')
+               ->take(10)
+               ->get();
+               
 		$result["suggestions"] = [];
 		
 		foreach ($components as $component)

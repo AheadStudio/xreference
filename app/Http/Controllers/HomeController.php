@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\FeedbackForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
-use URL;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -29,6 +30,41 @@ class HomeController extends Controller
 	    $userId = Auth::id();
 	    return view('home', compact('userId'));
     }
+    
+    
+    /**
+     * Send feedback to manager.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function feedback(Request $request)
+    {
+        
+        $recipients = \App\User::where('recipient', true)
+        	->select('email')
+        	->get();
+           
+        $recipients = $recipients->pluck('email')->all();
+        
+		$data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'comment' => $request->comment
+        ];
+		
+		if (!empty($recipients) && !empty($data)){
+			Mail::to($recipients)->send(new FeedbackForm($data));
+			
+			$request->session()->flash('homepage_message','Your message has been sended!');
+		} else {
+			$request->session()->flash('homepage_message','Message not sended!');
+		}
+		
+		return redirect('/');
+    }
+    
     
     /**
      * A.
@@ -147,6 +183,24 @@ class HomeController extends Controller
 			    }
 			}
 			$result["FINAL"] = $finalReferences;
+		}
+		
+		// apply filters
+		foreach ($result as &$references){
+			if ($references->isNotEmpty()){
+				if ($request->factory_ref == 'on'){
+					$references = collect($references->where('featured', 1)->all());
+			    }
+			    
+			    if ($request->pin_ref == 'on'){
+					$references = collect($references->where('type', 'direct')->all());
+			    }
+				
+				if ($request->my_ref == 'on'){
+				    $userId = Auth::id();
+					$references = collect($references->where('user_id', $userId)->all());
+			    }
+			}
 		}
 		
 		//dd($remainQuriesPattern);
@@ -468,6 +522,9 @@ class HomeController extends Controller
 	    // wright out cropped part name with and without symbols
 		$k = 0; // last chars
 		$j = 0; // first chars
+	    
+	    $sansLast = [];
+	    $sansFirst = [];
 	    
 	    for ($i = 1; $i <= $queryLength-3; $i++) {
 		    
