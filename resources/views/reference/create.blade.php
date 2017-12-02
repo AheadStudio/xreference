@@ -33,20 +33,20 @@
 			                	{!! Form::select('type', ['direct' => 'Direct', 'nearest' => 'Nearest', 'func_repl' => 'Functional Replacement'], null, ['class'=>'form-control'])!!}
 			                </div>
 			            </div>
-			            
-			            <div class="form-group">
-			            	{!! Form::label('status', 'Status', ['class' => 'col-md-3 col-md-offset-1 control-label']) !!}
-			                <div class="col-md-4">
-			                	{!! Form::select('status', ['active' => 'Active', 'eol' => 'EOL', 'obsolete' => 'Obsolete', 'nrnd' => 'NRND'], null, ['class'=>'form-control'])!!}
-			                </div>
-			            </div>
 			        	
 						<div class="form-group">
                             <div class="col-md-6 col-md-offset-5">
-                                <button type="submit" class="btn btn-primary" id="submit-reference">
+                                <button type="submit" class="btn btn-primary" id="submit-reference" disabled="disabled">
                                     Add XReference
                                 </button>
                             </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-md-offset-3">
+	                        <div class="alert alert-warning alert-dismissible" role="alert">
+							  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							  <strong>Warning!</strong> You should pick components from the dropdown
+							</div>
                         </div>
 					
 					{!! Form::close() !!}

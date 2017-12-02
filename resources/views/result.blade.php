@@ -163,7 +163,7 @@
 		    	{!! Form::open(['method' => 'POST', 'action' => 'ReferencesController@downloadExcel', 'class' => 'form-inline form-button']) !!}
 		    		<a href="/reference/create" class="btn btn-primary btn-lg">+ Add my XReference</a>
 				    {{ csrf_field() }}
-				    {!! Form::hidden('components', $references->pluck('id')->toJson()) !!}
+				    {!! Form::hidden('components', $components) !!}
 				    {!! Form::submit('Download result', ['class'=>'btn btn-default btn-lg']) !!}
 				{!! Form::close() !!}
 		    </div>

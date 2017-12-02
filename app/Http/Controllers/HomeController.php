@@ -200,11 +200,18 @@ class HomeController extends Controller
 				    $userId = Auth::id();
 					$references = collect($references->where('user_id', $userId)->all());
 			    }
+			
+			
 			}
-		}
+		} unset($references);
 		
-		//dd($remainQuriesPattern);
-		return view('result', compact('result', 'initialPartName'));
+		// store finded id's
+		$components = [];
+		foreach ($result as $references){
+			$components = array_merge($components, $references->pluck('id')->all());
+		}
+		$components = json_encode($components);
+		return view('result', compact('result', 'components'));
     }
 
     /**
