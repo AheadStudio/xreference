@@ -5,10 +5,12 @@ namespace App;
 use ScoutElastic\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reference extends Model
 {
-	use Searchable;
+	//use Searchable;
+	use SoftDeletes;
 	
 	protected $indexConfigurator = ReferenceIndexConfigurator::class;
 	

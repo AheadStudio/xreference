@@ -184,7 +184,7 @@ class ReferencesController extends Controller
     {
         if($request->hasFile('import_file')){
 			$path = $request->file('import_file')->getRealPath();
-
+			
 			$data = Excel::load($path, function($reader) {})->get();
 
 			if(!empty($data) && $data->count()){
@@ -193,7 +193,6 @@ class ReferencesController extends Controller
 				
 				foreach($data as $reference)
 				{
-					//dd($reference);
 					if ($reference->part_number && $reference->xreference_part_number){
 						
 						// Get from DB or create producers
@@ -230,19 +229,25 @@ class ReferencesController extends Controller
 						    ]
 						);
 						
+						
 						// Create reference
 						$xreference = Reference::firstOrCreate(
 						    [
 						    	'component_id' => $component->id,
 								'ref_component_id' => $refComponent->id,
+								'user_id' => $user->id,
 						    ],
 						    [
-						    	'user_id' => $user->id,
-								'type' => strtolower($reference->replacement_type), // add validation
+						    	'type' => strtolower($reference->replacement_type), // add validation
 								'comment' => $reference->comment,
 								'featured' => 0 // add checking
 						    ]
 						);
+						
+						// Soft Delete
+						if ($reference->delete == "DEL"){
+							$xreference->delete();
+						}
 					}
 					//dd($xreference);
 				}
@@ -264,3 +269,4 @@ class ReferencesController extends Controller
 		return back()->with('error','Please Check your file, Something is wrong there.');
     }
 }
+

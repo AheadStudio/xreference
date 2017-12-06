@@ -48,7 +48,7 @@ class ExcelProcessingController extends Controller
 			$data = Excel::load($path, function($reader) {})->get();
 
 			if(!empty($data) && $data->count()){
-
+				
 				foreach ($data->toArray() as $key => $value) {
 					if(!empty($value)){
 						foreach ($value as $v) {		
