@@ -1,33 +1,37 @@
-#app {
-  height: 80vh;
+html {
+  min-height: 100%;
+  height: 100%;
 }
-.navbar-brand--image {
-  padding-top: 6px !important;
+body {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 65px !important;
+  background-color: #fff !important;
 }
-.form-button {
-  margin-top: 5px !important;
+.page-footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  height: 65px;
+  width: 100%;
+  padding: 25px 0 20px 0;
+  overflow: hidden;
+  background-color: #f8f9fa;
 }
-.footer-social {
-  font-size: 42px;
-  color: #3b5998;
+.dropdown.show .dropdown-menu {
+  display: block;
 }
-.hero-text {
-  font-size: 16px;
+.page-content {
+  padding: 50px 0 80px 0;
 }
-.tempHidden {
-  display: none;
+label.required:after {
+  content: "*";
+  margin-left: 5px;
+  color: #cd0520;
 }
-.autocomplete-suggestion .search-item {
-  border-radius: 0 !important;
-  padding: 3px 10px;
-}
-.autocomplete-suggestion .search-item .search-item-name {
-  font-size: 12px;
-}
-.autocomplete-suggestion:last-child .search-item {
-  border-bottom-right-radius: 4px !important;
-  border-bottom-left-radius: 4px !important;
-}
-.autocomplete-suggestion:nth-child(2n) .search-item {
-  border-top: 0;
+.badge-lg {
+  margin: 0 5px;
+  font-size: 110% !important;
 }

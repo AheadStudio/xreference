@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Mail\FeedbackForm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,8 +28,9 @@ class HomeController extends Controller
      */
     public function index(){
 	    
+	    $count = DB::table('references')->count();
 	    $userId = Auth::id();
-	    return view('home', compact('userId'));
+	    return view('home', compact('userId', 'count'));
     }
     
     
@@ -62,7 +64,12 @@ class HomeController extends Controller
 			$request->session()->flash('homepage_message','Message not sended!');
 		}
 		
-		return redirect('/');
+		return redirect('/formresult/');
+    }
+    
+    
+    public function formresult() {
+	    return view('formresult');
     }
     
     
@@ -90,7 +97,7 @@ class HomeController extends Controller
     	for ($i = 0; $i < $levels; $i++) {
 	    	
 	    	$result[$i] = Collection::make();
-	    	
+	   
 	    	foreach ($words[$i] as $key => $word){
 		    	
 		    	$references = [];
@@ -231,9 +238,7 @@ class HomeController extends Controller
 				$words[] = $reference->replacement->part_name;
 			// get references to COMPONENT  
 		    } elseif ($reference->xquery){
-			    
 			    $words[] = $reference->component->part_name;
-			
 			// how the hell..
 		    } else {
 			    $words[] = 'This is a bug!';

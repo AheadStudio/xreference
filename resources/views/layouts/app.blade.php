@@ -14,101 +14,79 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
-        <nav class="navbar navbar-default navbar-static-top">
-            <div class="container">
-                <div class="navbar-header">
-
-                    <!-- Collapsed Hamburger -->
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
-                        <span class="sr-only">Toggle Navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-
-                    <!-- Branding Image -->
-                   <a class="navbar-brand navbar-brand--image" href="{{ url('/') }}">
-                        <img alt="Brand" src="/images/logo.png">
-                        
-                    </a>
-                </div>
-
-                <div class="collapse navbar-collapse" id="app-navbar-collapse">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="nav navbar-nav">
-                        &nbsp;
-                    </ul>
-
-                    <!-- Right Side Of Navbar -->
-                    <ul class="nav navbar-nav navbar-right">
-                        <!-- Authentication Links -->
-                        @if (Auth::guest())
-                            <li><a href="{{ route('login') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</a></li>
-                            <li><a href="{{ route('register') }}"><i class="fa fa-user" aria-hidden="true"></i> Register</a></li>
-                        @else
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                                    Welcome {{ Auth::user()->name }}!<span class="caret"></span>
-                                </a>
-
-                                <ul class="dropdown-menu" role="menu">
-                                    <li>
-                                    	@if (Auth::user()->hasPermission('browse_admin'))
-	                                    	<a href="/admin">
-	                                            Admin Panel 
-	                                        </a>
-                                    	
-                                    	@endif
-                                    	<a href="/account">
-                                            My account
-                                        </a>
-                                        <a href="{{ route('logout') }}"
-                                            onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                            Logout
-                                        </a>
-										
-                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                            {{ csrf_field() }}
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        @endif
-                    </ul>
-                </div>
-            </div>
-        </nav>
-        
-        @yield('content')
-    </div>
-	
-	<div class="container">
-	    <div class="row">
-	    	
-	    </div>
-	    
-	    <hr>
-	    
-	    <div class="row">
-	    
-		    <div class="col-md-6"><p>© Xreference 2017</p></div>
-		    
-		    <a href="" class="btn btn-primary btn-sm" data-toggle="modal" data-target=".bs-review-modal">Send feedback</a>
-		    <a href="https://facebook.com" target="_blank" class="footer-social pull-right"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <nav class="navbar navbar-light bg-light">
+		<div class="container">
+	        <a class="navbar-brand" href="{{ url('/') }}">
+		        <img alt="xReferences" src="/images/logo.png">
+	        </a>
+            <ul class="nav float-right">
+                <!-- Authentication Links -->
+                @if (Auth::guest())
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}"><i class="fa fa-user" aria-hidden="true"></i> Register</a></li>
+                @else
+                    <li class="nav-item">
+                    	<div class="dropdown">
+	                        <a href="#" class="nav-link dropdown-toggle" id="headerProfileMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	                            Welcome {{ Auth::user()->name }}!<span class="caret"></span>
+	                        </a>
+	                        <div class="dropdown-menu" aria-labelledby="headerProfileMenu">
+	                        	@if(Auth::user()->hasPermission('browse_admin'))
+	                            	<a class="dropdown-item" href="/admin">
+	                                    Admin Panel 
+	                                </a>
+	                        	@endif
+	                        	<a class="dropdown-item" href="/account">
+	                                My account
+	                            </a>
+	                            <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+	                                Logout
+	                            </a>
+	                        </div>
+                    	</div>
+                    </li>
+                @endif
+                
+				@if (!Auth::guest())
+				    <li class="nav-item">
+				    	<a href="/reference/create" class="btn btn-success">+ Add my XReference</a>
+				    </li>
+				    &nbsp;
+				@endif
+                
+                <li class="nav-item">
+                	<a href="" class="btn btn-primary" data-toggle="modal" data-target=".bs-review-modal">Send feedback</a>
+                </li>
+            </ul>
 		</div>
-    </div>
-    
+    </nav>
+	
+	<main class="page-content">
+		<div class="container">
+	       @yield('content')
+		</div>
+	</main>
+	
+	<footer class="footer page-footer">
+		<div class="container">
+		    <div class="float-left">© XReferences, {{ date("Y") }}</div>
+		    <a href="https://www.facebook.com/xreferences.info/" target="_blank" class="float-right"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+		</div>
+    </footer>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    {{ csrf_field() }}
+	</form>
+
     <div class="modal fade bs-review-modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				
 				{!! Form::open(['method' => 'POST', 'action'=> 'HomeController@feedback', 'class' => 'form-horizontal']) !!}
 		        	
-		        	<div class="modal-header text-center">
+		        	<div class="modal-header">
+			        	<h4 class="modal-title">Send feedback</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title">Your feedback</h4>
 					</div>
 		        	
 		        	<div class="modal-body">
@@ -117,36 +95,28 @@
 		        		{!! Form::hidden('query', null); !!}
 		        		
 		        		<div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-			                {!! Form::label('name', 'Name', ['class' => 'col-md-2 control-label']) !!}
-			                <div class="col-sm-10">
-			                	{!! Form::text('name', null, ['class'=>'form-control', 'required'])!!}
-			                </div>
+			                {!! Form::label('name', 'Name', ['class' => 'required']) !!}
+			                {!! Form::text('name', null, ['class'=>'form-control', 'required'])!!}
 			            </div>
 			            
 			            <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-			                {!! Form::label('email', 'E-mail', ['class' => 'col-md-2 control-label']) !!}
-			                <div class="col-sm-10">
-			                	{!! Form::email('email', null, ['class'=>'form-control', 'required'])!!}
-			                </div>
+			                {!! Form::label('email', 'E-mail', ['class' => 'required']) !!}
+			                {!! Form::email('email', null, ['class'=>'form-control', 'required'])!!}
 			            </div>
 			            
 			            <div class="form-group{{ $errors->has('phone') ? ' has-error' : '' }}">
-			                {!! Form::label('phone', 'Phone', ['class' => 'col-md-2 control-label']) !!}
-			                <div class="col-sm-10">
-			                	{!! Form::text('phone', null, ['class'=>'form-control'])!!}
-			                </div>
+			                {!! Form::label('phone', 'Phone', ['class' => '']) !!}
+			                {!! Form::text('phone', null, ['class'=>'form-control'])!!}
 			            </div>
 			            
 			            <div class="form-group{{ $errors->has('comment') ? ' has-error' : '' }}">
-			                {!! Form::label('comment', 'Comment', ['class' => 'col-md-2 control-label']) !!}
-			                <div class="col-sm-10">
-			                	{!! Form::textarea('comment', null, ['class'=>'form-control', 'required'])!!}
-			                </div>
+			                {!! Form::label('comment', 'Comment', ['class' => 'required']) !!}
+			                {!! Form::textarea('comment', null, ['class'=>'form-control', 'required'])!!}
 			            </div>
 					</div>
 					
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 						{!! Form::submit('Send', ['class' => 'btn btn-primary']); !!}
 					</div>
 					

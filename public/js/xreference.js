@@ -60,20 +60,12 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 42);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 42:
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(43);
-
-
-/***/ }),
-
-/***/ 43:
+/***/ 10:
 /***/ (function(module, exports) {
 
 (function ($) {
@@ -89,19 +81,16 @@ module.exports = __webpack_require__(43);
 			showCompanyText: {
 
 				init: function init() {
-					var self = this,
-					    checkbox = $(".deactivated");
-
-					checkbox.on("change", function () {
-						checkboxItem = $(this);
-						$hiddenField = $("#hiddenField", $sel.body);
-
-						if ($hiddenField.hasClass("tempHidden")) {
-							$hiddenField.slideDown().removeClass("tempHidden");
+					$("input[name=is_company]").on("change", function () {
+						if ($(this).prop("checked")) {
+							$("input[name=company_name]").css("visibility", "visible");
 						} else {
-							$hiddenField.addClass("tempHidden").slideUp();
+							$("input[name=company_name]").css("visibility", "hidden");
 						}
 					});
+					if ($("input[name=is_company]").length && $("input[name=company_name]").val()) {
+						$("input[name=is_company]").trigger("click");
+					}
 				}
 
 			},
@@ -206,6 +195,14 @@ module.exports = __webpack_require__(43);
 $(document).ready(function () {
 	$('[data-toggle="tooltip"]').tooltip();
 });
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(10);
+
 
 /***/ })
 

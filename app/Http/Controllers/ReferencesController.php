@@ -50,7 +50,9 @@ class ReferencesController extends Controller
      */
     public function store(Request $request)
     {
-        $input = $request;
+       /* $input = $request;
+        
+        //dd($input->xreference_part_number);
         
         $user = Auth::user();
 		$data = [
@@ -67,7 +69,103 @@ class ReferencesController extends Controller
         $request->session()->flash('homepage_message','New reference has been created!');
         
         return redirect('/');
+        */
+        
+        
+	    $input = $request;
+	    
+	    $user = Auth::user();
+	    
+	    //dd(preg_replace('/[^A-Za-z0-9]/', '', $input->part_number));
+	    
+		$comProducer = Producer::firstOrCreate(
+		    ['name' => strtoupper($input->part_manufacturer)], ['display_name' => $input->part_manufacturer]
+		);
+		$component = Component::firstOrCreate(
+		    ['stored_name' => preg_replace('/[^A-Za-z0-9]/', '', $input->part_number)],
+		    [  	'part_name' => $input->part_number,
+		    	'producer_id' => $comProducer->id,
+		    	'package' => $input->part_package,
+		    	'status' => $input->part_status
+		    ]
+		);
+		
+		$refProducer = Producer::firstOrCreate(
+		    ['name' => strtoupper($input->xreference_manufacturer)], ['display_name' => $input->xreference_manufacturer]
+		);
+		$reference = Component::firstOrCreate(
+		    ['stored_name' => preg_replace('/[^A-Za-z0-9]/', '', $input->xreference_number)],
+		    [  	'part_name' => $input->xreference_number,
+		    	'producer_id' => $refProducer->id,
+		    	'package' => $input->xreference_package,
+		    	'status' => $input->xreference_status
+		    ]
+		);
+		
+		
+						$xreference = Reference::firstOrCreate(
+						    [
+						    	'component_id' => $component->id,
+								'ref_component_id' => $reference->id,
+								'user_id' => $user->id,
+						    ],
+						    [
+						    	'type' => strtolower($input->type), // add validation
+								'comment' => $input->comment,
+								'featured' => 0 // add checking
+						    ]
+						);
+		
+        
+        $request->session()->flash('reference_create_message','New reference has been created!');
+        return redirect('/reference/create/');
+        
     }
+    
+    /**
+	    Save xreference form form
+	*/
+	public function storeFromForm(Request $request) {
+	    $input = $request;
+	    
+		
+		$comProducer = Producer::firstOrCreate(
+		    ['name' => strtoupper($input->part_manufacturer)], ['display_name' => $input->part_manufacturer]
+		);
+		$component = Component::firstOrCreate(
+		    ['stored_name' => preg_replace('/[^A-Za-z0-9]/', '', $input->part_number)],
+		    [  	'part_name' => $input->part_number,
+		    	'producer_id' => $comProducer->id,
+		    	'package' => $input->part_package,
+		    	'status' => $input->part_status
+		    ]
+		);
+		//$request->session()->flash('homepage_message','New reference has been created!');
+						/*$refComponent = Component::firstOrCreate(
+						    ['stored_name' => preg_replace('/[^A-Za-z0-9]/', '', $reference->xreference_part_number)],
+						    [	'part_name' => $reference->xreference_part_number,
+						    	'producer_id' => $refProducer->id,
+						    	'package' => $reference->package,
+						    	'status' => $reference->status
+						    ]
+						);*/
+						
+						
+						// Create reference
+						/*$xreference = Reference::firstOrCreate(
+						    [
+						    	'component_id' => $component->id,
+								'ref_component_id' => $refComponent->id,
+								'user_id' => $user->id,
+						    ],
+						    [
+						    	'type' => strtolower($reference->replacement_type), // add validation
+								'comment' => $reference->comment,
+								'featured' => 0 // add checking
+						    ]
+						);*/
+    }
+    
 
     /**
      * Display the specified resource.
@@ -186,13 +284,16 @@ class ReferencesController extends Controller
 			$path = $request->file('import_file')->getRealPath();
 			
 			$data = Excel::load($path, function($reader) {})->get();
-
+			
+			//dd($data);
+			
 			if(!empty($data) && $data->count()){
 				
 				$user = Auth::user();
 				
 				foreach($data as $reference)
 				{
+					//dd($reference);
 					if ($reference->part_number && $reference->xreference_part_number){
 						
 						// Get from DB or create producers
@@ -210,7 +311,6 @@ class ReferencesController extends Controller
 						} else {
 							$refProducer = Producer::firstOrCreate(['name' => 'NONAME'], ['display_name' => 'NoName']);
 						}
-						
 						// Get from DB or create both components
 						$component = Component::firstOrCreate(
 						    ['stored_name' => preg_replace('/[^A-Za-z0-9]/', '', $reference->part_number)],
@@ -228,7 +328,7 @@ class ReferencesController extends Controller
 						    	'status' => $reference->status
 						    ]
 						);
-						
+					
 						
 						// Create reference
 						$xreference = Reference::firstOrCreate(
@@ -244,6 +344,7 @@ class ReferencesController extends Controller
 						    ]
 						);
 						
+						
 						// Soft Delete
 						if ($reference->delete == "DEL"){
 							$xreference->delete();
@@ -252,21 +353,18 @@ class ReferencesController extends Controller
 					//dd($xreference);
 				}
 				
-				
-				
-				
-
-				
-				if(!empty($xreference)){
-					//Item::insert($insert);
-					return back()->with('success','Record has been uploaded.');
-				}
-
+				$request->session()->flash('success','Record has been uploaded');
+				return redirect('/account/upload/');
+			} else {
+				$request->session()->flash('error','Please check your file, something is wrong there.');
+				return redirect('/account/upload/');
 			}
-
+		} else {
+			$request->session()->flash('error','Please check your file, something is wrong there.');
+			return redirect('/account/upload/');
 		}
 
-		return back()->with('error','Please Check your file, Something is wrong there.');
+		//return back()->with('error','Please Check your file, Something is wrong there.');
     }
 }
 

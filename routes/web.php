@@ -23,8 +23,12 @@ Route::get('/home', function () {
     return redirect()->route('home');
 });
 Route::post('/feedback', 'HomeController@feedback');
+Route::any('/formresult', 'HomeController@formresult');
+
 
 Route::any('/result', 'HomeController@result');
+
+
 
 Route::get('/account/upload', 'UsersController@upload');
 Route::post('/account/download', 'ReferencesController@downloadExcel');

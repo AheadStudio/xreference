@@ -1,96 +1,85 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Register</div>
-
-                <div class="panel-body">
-                    <form class="form-horizontal" method="POST" action="{{ route('register') }}">
-                        {{ csrf_field() }}
-
-                        <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-                            <label for="name" class="col-md-4 control-label">Name</label>
-
-                            <div class="col-md-6">
-                                <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
-
-                                @if ($errors->has('name'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
-
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">Password</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password-confirm" class="col-md-4 control-label">Confirm Password</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-                            </div>
-                        </div>
-						
-						<div class="form-group">
-							{!! Form::label('is_company', 'Company:', ['class' => 'col-md-4 control-label deactivated']) !!}
-							<div class="col-md-6">
-			                	{!! Form::checkbox('is_company', null, false, ['class' => 'deactivated']); !!}
-							</div>
-			            </div>
-						
-						<div id="hiddenField" class="form-group tempHidden">
-							<div class="col-md-6 col-md-offset-4 ">
-			                	{!! Form::text('company_name', null, ['class'=>'form-control'])!!}
-							</div>
-			            </div>
-						
-						<div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-								{!! app('captcha')->display($attributes = []) !!}
-                            </div>
+<h1>Register</h1>
+<br />
+<div class="row">
+	<div class="col-md-6">              
+		<form class="form" method="POST" action="{{ route('register') }}">
+		    {{ csrf_field() }}
+		
+		    <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+		        <label for="name" class="required">Name</label>
+		
+		        <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
+		
+		            @if ($errors->has('name'))
+		                <span class="text-danger">
+		                    {{ $errors->first('name') }}
+		                </span>
+		            @endif
+		        
+		    </div>
+		
+		    <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
+		        <label for="email" class="required">E-Mail Address</label>
+		
+		        <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+		
+		            @if ($errors->has('email'))
+		                <span class="text-danger">
+		                    {{ $errors->first('email') }}
+		                </span>
+		            @endif
+		       
+		    </div>
+		
+		    <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+		        <label for="password" class="required">Password</label>
+		
+		            <input id="password" type="password" class="form-control" name="password" required>
+		
+		            @if ($errors->has('password'))
+		                <span class="text-danger">
+		                    {{ $errors->first('password') }}
+		                </span>
+		            @endif
+		        
+		    </div>
+		
+		    <div class="form-group">
+		        <label for="password-confirm" class="required">Confirm Password</label>
+		
+		            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
+		       
+		    </div>
+			
+			<div class="form-group">
+				<div class="form-row align-items-center">
+					<div class="col-auto">
+						<div class="form-check mb-2 mb-sm-0">
+							<label class="form-check-label">
+					        	{!! Form::checkbox('is_company', null, false, ['class' => 'form-check-input deactivated']); !!}
+					        	Company?
+							</label>
 						</div>
-						
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Register
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+					</div>
+					<div class="col-auto">
+						{!! Form::text('company_name', null, ['placeholder' => 'Company name', 'class'=>'form-control mb-2 mb-sm-0', 'style' => 'visibility: hidden;'])!!}
+					</div>
+				</div>
+		    </div>
+			
+			<div class="form-group">
+				{!! app('captcha')->display($attributes = []) !!}
+			</div>
+			
+		    <div class="form-group">
+		            <button type="submit" class="btn btn-primary btn-lg">
+		                Register
+		            </button>
+		    </div>
+		</form>
+	</div>
 </div>
 @endsection

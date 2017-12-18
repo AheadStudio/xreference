@@ -11,22 +11,16 @@
 		showCompanyText: {
 
 	        init: function() {
-	          var self = this,
-	              checkbox = $(".deactivated");
-	
-	          checkbox.on("change", function() {
-	            checkboxItem = $(this);
-	            $hiddenField = $("#hiddenField", $sel.body);
-	            
-	            if($hiddenField.hasClass("tempHidden")) {
-		            $hiddenField.slideDown().removeClass("tempHidden");
-	            } else {
-		            $hiddenField.addClass("tempHidden").slideUp();
-	            }
-	            
-	          });
-	          
-	          
+	  			$("input[name=is_company]").on("change", function() {
+		  			if($(this).prop("checked")) {
+			  			$("input[name=company_name]").css("visibility", "visible");
+		  			} else {
+			  			$("input[name=company_name]").css("visibility", "hidden");
+		  			}
+	  			});
+		        if($("input[name=is_company]").length && $("input[name=company_name]").val()) {
+			        $("input[name=is_company]").trigger("click");
+		        }     
 	        },
 
     	},
